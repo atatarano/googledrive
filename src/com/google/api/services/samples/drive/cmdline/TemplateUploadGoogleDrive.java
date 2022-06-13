@@ -76,7 +76,7 @@ public class TemplateUploadGoogleDrive {
 							DateTime modtime = file.getModifiedTime();
 							Date dtfile=new Date(modtime.getValue());
 							System.out.println("Verifico se:" + dtfile + " e' anteriore a:" + dataLimite);
-							if (dtfile.before(dataLimite)) {
+							if (dtfile.before(dataLimite) /*|| file.getName().indexOf("newgo-1.215")!=-1*/) {
 								System.out.println("###cancello:" + file.getName() + " (" + file.getId() + ")");
 								deleteFile(drive, file.getId());
 								System.out.println("cancellato:" + file.getName() + " (" + file.getId() + ")");
@@ -93,7 +93,8 @@ public class TemplateUploadGoogleDrive {
 					false);
 
 			Properties props = new Properties();
-			java.io.File fileProps = new java.io.File("./fileUploaded.propertis");
+			java.io.File fileProps = new java.io.File(fileName);
+			fileProps = new java.io.File(fileProps.getParentFile().getAbsolutePath()+ "/fileUploaded.propertis");
 			if (fileProps.exists()) {
 				FileInputStream is = new FileInputStream(fileProps);
 				props.load(is);
@@ -129,11 +130,6 @@ public class TemplateUploadGoogleDrive {
 		uploader.setProgressListener(new FileUploadProgressListener());
 
 		com.google.api.services.drive.model.File file = (com.google.api.services.drive.model.File) insert.execute();
-
-		Permission permission = new Permission();
-		permission.setEmailAddress("atatarano@gmail.com");
-		permission.setRole("owner");
-		drive.permissions().create(file.getId(), permission).execute();
 
 		return file;
 	}
