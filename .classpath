@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="commons-codec-1.3.jar"/>
+	<classpathentry kind="lib" path="commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="google-api-client-1.23.0.jar"/>
+	<classpathentry kind="lib" path="google-api-services-drive-v3-rev86-1.23.0.jar"/>
+	<classpathentry kind="lib" path="google-api-services-oauth2-v2-rev131-1.23.0.jar"/>
+	<classpathentry kind="lib" path="google-auth-library-credentials-0.11.0.jar"/>
+	<classpathentry kind="lib" path="google-auth-library-oauth2-http-0.11.0.jar"/>
+	<classpathentry kind="lib" path="google-http-client-1.23.0.jar"/>
+	<classpathentry kind="lib" path="google-http-client-jackson2-1.23.0.jar"/>
+	<classpathentry kind="lib" path="google-oauth-client-1.23.0.jar"/>
+	<classpathentry kind="lib" path="google-oauth-client-java6-1.23.0.jar"/>
+	<classpathentry kind="lib" path="google-oauth-client-jetty-1.23.0.jar"/>
+	<classpathentry kind="lib" path="guava-20.0.jar"/>
+	<classpathentry kind="lib" path="guava-jdk5-17.0.jar"/>
+	<classpathentry kind="lib" path="httpclient-4.0.1.jar"/>
+	<classpathentry kind="lib" path="httpcore-4.0.1.jar"/>
+	<classpathentry kind="lib" path="jackson-core-2.1.3.jar"/>
+	<classpathentry kind="lib" path="jetty-6.1.26.jar"/>
+	<classpathentry kind="lib" path="jetty-util-6.1.26.jar"/>
+	<classpathentry kind="lib" path="jsr305-1.3.9.jar"/>
+	<classpathentry kind="lib" path="servlet-api-2.5-20081211.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
