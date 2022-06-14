@@ -1,5 +1,6 @@
 package com.google.api.services.samples.drive.cmdline;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,6 +31,7 @@ public class TemplateUploadGoogleDrive {
 
 	public static void main(String[] args) {
 		String fileToUpload = args[0];
+		File UPLOAD_FILE=new File(fileToUpload);
 		
 		//glob:*.{zip,tgz}
 		String patterns=args[1];
@@ -73,7 +75,7 @@ public class TemplateUploadGoogleDrive {
 							DateTime modtime = file.getModifiedTime();
 							Date dtfile=new Date(modtime.getValue());
 							System.out.println("Verifico se:" + dtfile + " e' anteriore a:" + dataLimite);
-							if (dtfile.before(dataLimite) /*|| file.getName().indexOf("newgo-1.215")!=-1*/) {
+							if (dtfile.before(dataLimite) || name.equals(UPLOAD_FILE.getName())) {
 								System.out.println("###cancello:" + file.getName() + " (" + file.getId() + ")");
 								deleteFile(drive, file.getId());
 								System.out.println("cancellato:" + file.getName() + " (" + file.getId() + ")");
@@ -86,7 +88,7 @@ public class TemplateUploadGoogleDrive {
 			String fileName = fileToUpload;
 
 			View.header1("Avvio upload di " + fileName);
-			com.google.api.services.drive.model.File uploadedFile = uploadFile(drive, driveDirectoryId, fileName, "application/zip",
+			com.google.api.services.drive.model.File uploadedFile = uploadFile(drive, driveDirectoryId, UPLOAD_FILE, "application/zip",
 					false);
 
 			Properties props = new Properties();
@@ -112,9 +114,8 @@ public class TemplateUploadGoogleDrive {
 		System.exit(1);
 	}
 
-	private static com.google.api.services.drive.model.File uploadFile(Drive drive, String driveDirectoryId, String pathname, String mimeType,
+	private static com.google.api.services.drive.model.File uploadFile(Drive drive, String driveDirectoryId, java.io.File UPLOAD_FILE, String mimeType,
 			boolean useDirectUpload) throws IOException {
-		java.io.File UPLOAD_FILE = new java.io.File(pathname);
 		com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
 		fileMetadata.setName(UPLOAD_FILE.getName());
 		fileMetadata.setParents(Collections.singletonList(driveDirectoryId));
