@@ -9,12 +9,10 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Properties;
-import java.util.regex.Pattern;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -26,10 +24,9 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.FileList;
-import com.google.api.services.drive.model.Permission;
 
 public class TemplateUploadGoogleDrive {
-	private static final String KEYFILE = "/gestioneservertempogara-4e11d07e6efd.json";
+	private static final String KEYFILE = "/gestioneservertempogara-eb4c1e7d0348.json";
 
 	public static void main(String[] args) {
 		String fileToUpload = args[0];
