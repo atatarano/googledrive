@@ -68,8 +68,12 @@ public class TemplateUploadGoogleDrive {
 					boolean matchTemplate=searchWithWc(Paths.get(file.getName()), patterns);
 					if (!matchTemplate && (!name.equals("DB")) && (!name.equals("BackupSito"))) {
 						System.out.println("###cancello:" + file.getName() + " (" + file.getId() + ")");
-						deleteFile(drive, file.getId());
-						System.out.println("cancellato:" + file.getName() + " (" + file.getId() + ")");
+						try {
+							deleteFile(drive, file.getId());
+							System.out.println("cancellato:" + file.getName() + " (" + file.getId() + ")");
+						} catch (Exception e) {
+							System.err.println("Errore: "+e.getMessage());
+						}
 					} else {
 						if (matchTemplate) {
 							DateTime modtime = file.getModifiedTime();
