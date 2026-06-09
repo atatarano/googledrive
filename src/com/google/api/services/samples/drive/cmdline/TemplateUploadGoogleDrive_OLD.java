@@ -26,31 +26,23 @@ import com.google.api.client.util.DateTime;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.model.FileList;
 
-public class TemplateUploadGoogleDrive {
+public class TemplateUploadGoogleDrive_OLD {
 	private static final String KEYFILE = "/gestioneservertempogara-eb4c1e7d0348.json";
 
 	public static void main(String[] args) {
-		if (args.length < 4) {
-			System.err.println("Uso: <fileToUpload> <patterns> <driveDirectoryId> <giorniDiAnzianita>");
-			System.exit(1);
-		}
-
 		String fileToUpload = args[0];
-		File UPLOAD_FILE = new File(fileToUpload);
+		File UPLOAD_FILE=new File(fileToUpload);
 		
-		// Es. glob:*.{zip,tgz}
-		String patterns = args[1];
-		String driveDirectoryId = args[2];
+		//glob:*.{zip,tgz}
+		String patterns=args[1];
+		
+		String driveDirectoryId=args[2];
+		
 		int giorniDiAnzianita = Integer.parseInt(args[3]);
-
 		try {
-			InputStream inputStream = TemplateUploadGoogleDrive.class.getResourceAsStream(KEYFILE);
-			if (inputStream == null) {
-				System.err.println("File delle credenziali non trovato nel classpath: " + KEYFILE);
-				System.exit(1);
-			}
+			InputStream inputStream = TemplateUploadGoogleDrive_OLD.class.getResourceAsStream(KEYFILE);
 			
-			System.out.println("InputStream disponibile: " + inputStream.available());
+			System.out.println(inputStream.available());
 			
 			GoogleCredential credential = GoogleCredential
 					.fromStream(inputStream)
@@ -63,76 +55,63 @@ public class TemplateUploadGoogleDrive {
 					.setApplicationName("GestioneServerTempogara").build();
 
 			Calendar cal = Calendar.getInstance();
-			cal.add(Calendar.DAY_OF_MONTH, -1 * giorniDiAnzianita);
+			cal.add(5, -1 * giorniDiAnzianita);
 			Date dataLimite = new Date(cal.getTimeInMillis());
-
-			// Costruiamo la query per cercare SOLO i file dentro la cartella specifica e non nel cestino
-			String querySpazio = String.format("'%s' in parents and trashed = false", driveDirectoryId);
 
 			String pageToken = null;
 			do {
-				FileList result = drive.files().list()
-						.setQ(querySpazio) // <-- FILTRO FONDAMENTALE PER LA CARTELLA
-						.setSpaces("drive")
-						.setFields("nextPageToken, files(id, name, modifiedTime)")
-						.setPageToken(pageToken)
-						.execute();
-
+				FileList result = (FileList) drive.files().list().setSpaces("drive")
+						.setFields("nextPageToken, files(id, name, modifiedTime)").setPageToken(pageToken).execute();
 				for (com.google.api.services.drive.model.File file : result.getFiles()) {
 					String name = file.getName();
-					System.out.printf("Trovato file nella cartella di destinazione: %s (%s)\n", name, file.getId());
-					
-					// Verifica se il file soddisfa il pattern glob fornito in input
-					boolean matchTemplate = searchWithWc(Paths.get(name), patterns);
-					
-					if (matchTemplate) {
-						DateTime modtime = file.getModifiedTime();
-						Date dtfile = new Date(modtime.getValue());
-						
-						// Cancella se è più vecchio della data limite OPPURE se ha lo stesso nome del file che stiamo caricando
-						if (dtfile.before(dataLimite) || name.equals(UPLOAD_FILE.getName())) {
-							System.out.println("### Rilevato per la cancellazione (anzianità o sovrascrittura): " + name);
-							try {
-								deleteFile(drive, file.getId());
-								System.out.println("Cancellato con successo: " + name);
-							} catch (Exception e) {
-								System.err.println("Errore durante la cancellazione di " + name + ": " + e.getMessage());
-							}
-						} else {
-							System.out.println("File " + name + " conservato (è recente: " + dtfile + ")");
+					System.out.printf("Found file: %s (%s)\n", new Object[] { file.getName(), file.getId() });
+					boolean matchTemplate=searchWithWc(Paths.get(file.getName()), patterns);
+					if (!matchTemplate && (!name.equals("DB")) && (!name.equals("BackupSito"))) {
+						System.out.println("###cancello:" + file.getName() + " (" + file.getId() + ")");
+						try {
+							deleteFile(drive, file.getId());
+							System.out.println("cancellato:" + file.getName() + " (" + file.getId() + ")");
+						} catch (Exception e) {
+							System.err.println("Errore: "+e.getMessage());
 						}
 					} else {
-						// Se non corrisponde al pattern, lo ignoriamo completamente (sicurezza)
-						System.out.println("File " + name + " ignorato perché non corrisponde al pattern " + patterns);
+						if (matchTemplate) {
+							DateTime modtime = file.getModifiedTime();
+							Date dtfile=new Date(modtime.getValue());
+							System.out.println("Verifico se:" + dtfile + " e' anteriore a:" + dataLimite);
+							if (dtfile.before(dataLimite) || name.equals(UPLOAD_FILE.getName())) {
+								System.out.println("###cancello:" + file.getName() + " (" + file.getId() + ")");
+								deleteFile(drive, file.getId());
+								System.out.println("cancellato:" + file.getName() + " (" + file.getId() + ")");
+							}
+						}
 					}
 				}
 				pageToken = result.getNextPageToken();
 			} while (pageToken != null);
-
 			String fileName = fileToUpload;
 
 			View.header1("Avvio upload di " + fileName);
 			com.google.api.services.drive.model.File uploadedFile = uploadFile(drive, driveDirectoryId, UPLOAD_FILE, "application/zip",
 					false);
 
-			// Gestione file delle proprietà locale
 			Properties props = new Properties();
 			java.io.File fileProps = new java.io.File(fileName);
-			fileProps = new java.io.File(fileProps.getParentFile().getAbsolutePath() + "/fileUploaded.propertis");
+			fileProps = new java.io.File(fileProps.getParentFile().getAbsolutePath()+ "/fileUploaded.propertis");
 			if (fileProps.exists()) {
-				try (FileInputStream is = new FileInputStream(fileProps)) {
-					props.load(is);
-				}
+				FileInputStream is = new FileInputStream(fileProps);
+				props.load(is);
+				is.close();
 			}
 			props.setProperty(fileName, uploadedFile.getId());
-			try (FileOutputStream os = new FileOutputStream(fileProps)) {
-				props.store(os, new Date().toString());
-			}
+			FileOutputStream os = new FileOutputStream(fileProps);
+			props.store(os, new Date().toString());
+			os.close();
 
 			View.header1("Success!");
 			return;
 		} catch (IOException e) {
-			System.err.println("Errore I/O: " + e.getMessage());
+			System.err.println(e.getMessage());
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
@@ -152,7 +131,9 @@ public class TemplateUploadGoogleDrive {
 		uploader.setDirectUploadEnabled(useDirectUpload);
 		uploader.setProgressListener(new FileUploadProgressListener());
 
-		return insert.execute();
+		com.google.api.services.drive.model.File file = (com.google.api.services.drive.model.File) insert.execute();
+
+		return file;
 	}
 
 	private static void deleteFile(Drive drive, String fileId) throws IOException {
@@ -162,6 +143,8 @@ public class TemplateUploadGoogleDrive {
 	private static boolean searchWithWc(Path fileName, String pattern) throws IOException {
 		FileSystem fs = FileSystems.getDefault();
 		PathMatcher matcher = fs.getPathMatcher(pattern);
-		return matcher.matches(fileName);
+		Path name = fileName;
+		return matcher.matches(name);
 	}
+	
 }
